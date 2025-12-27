@@ -84,7 +84,7 @@ export const detectSignal = (candles: Candle[], index: number): { type: SignalTy
 
   let finalScore = 0;
 
-  // 1. CLIMATIC INSTITUTIONAL SPRING
+  // 1. CLIMATIC INSTITUTIONAL SPRING（向下流动性掠杀）
   if (bb && lowerWick > body * ULTRA_WICK_RATIO && stochRsi < 20) {
     const isDeepSweep = curr.low < recentLow;
     if (volMult > CLIMATIC_VOLUME_MULT && isDeepSweep && curr.low < bb.lower && next.close > curr.low) {
@@ -93,7 +93,7 @@ export const detectSignal = (candles: Candle[], index: number): { type: SignalTy
     }
   }
 
-  // INSTITUTIONAL UPTHRUST
+  // INSTITUTIONAL UPTHRUST （向上流动性掠杀）
   if (bb && upperWick > body * ULTRA_WICK_RATIO && stochRsi > 80) {
     const isDeepSweep = curr.high > recentHigh;
     if (volMult > CLIMATIC_VOLUME_MULT && isDeepSweep && curr.high > bb.upper && next.close < curr.high ) {
@@ -102,7 +102,7 @@ export const detectSignal = (candles: Candle[], index: number): { type: SignalTy
     }
   }
 
-  // 2. TWEEZERS
+  // 2. TWEEZERS（镊子型）
   const highsDiff = Math.abs(curr.high - prev.high) / curr.high;
   if (highsDiff < TWEEZER_TOLERANCE && prev.close > prev.open && curr.close < curr.open && stochRsi > 85 && curr.high >= recentHigh) {
     const volBonus = curr.volume > avgVol * 1.5 ? 15 : 0;
@@ -117,12 +117,14 @@ export const detectSignal = (candles: Candle[], index: number): { type: SignalTy
   }
 
   // 3. SUDDEN REVERSAL
+  //看涨反转
   if (prev.close < prev.open && prev2.close < prev2.open && stochRsi < 20) {
     if (curr.close > curr.open && curr.close > prev.open && volMult > REVERSAL_VOLUME_MULT) {
         finalScore = 45 + Math.min(25, (volMult - 1) * 15) + (curr.close > prev2.open ? 15 : 5);
         return { type: SignalType.SUDDEN_REVERSAL_UP, stochRsi, score: finalScore };
     }
   }
+  //看跌反转
   if (prev.close > prev.open && prev2.close > prev2.open && stochRsi > 80) {
     if (curr.close < curr.open && curr.close < prev.open && volMult > REVERSAL_VOLUME_MULT) {
         finalScore = 45 + Math.min(25, (volMult - 1) * 15) + (curr.close < prev2.open ? 15 : 5);
@@ -130,7 +132,7 @@ export const detectSignal = (candles: Candle[], index: number): { type: SignalTy
     }
   }
 
-  // 4. ENGULFING SIGNALS
+  // 4. ENGULFING SIGNALS(看涨吞没)
   const prevBody = Math.abs(prev.close - prev.open);
   if (curr.close > curr.open && prev.close < prev.open && body > prevBody) {
     if (stochRsi < 20 && curr.low <= recentLow) {
@@ -138,6 +140,7 @@ export const detectSignal = (candles: Candle[], index: number): { type: SignalTy
       return { type: SignalType.BULLISH_ENGULFING, stochRsi, score: finalScore };
     }
   }
+  //（看跌吞没）
   if (curr.close < curr.open && prev.close > prev.open &&  body > prevBody) {
     if (stochRsi > 80 && curr.high >= recentHigh) {
       finalScore = 40 + (volMult > 1.2 ? 15 : 0) + (body / prevBody > 1.5 ? 20 : 10);
@@ -146,11 +149,13 @@ export const detectSignal = (candles: Candle[], index: number): { type: SignalTy
   }
 
   // 5. CLASSIC PINBARS (HAMMER / SHOOTING STAR)
-  if (lowerWick >= range * PINBA_WICK_PERCENT && stochRsi <= 20 && curr.low <= recentLow) {
+  //（锤子）
+  if (lowerWick >= range * PINBA_WICK_PERCENT && stochRsi <= 20 && curr.low <= recentLow && next.close > next.open) {
     finalScore = 35 + (lowerWick / body > 2 ? 20 : 10) + (volMult > 1.2 ? 15 : 0);
     return { type: SignalType.HAMMER, stochRsi, score: finalScore };
   }
-  if (upperWick >= range * PINBA_WICK_PERCENT && stochRsi >= 80 && curr.high >= recentHigh) {
+  //黄昏星
+  if (upperWick >= range * PINBA_WICK_PERCENT && stochRsi >= 80 && curr.high >= recentHigh && next.close < next.open) {
     finalScore = 35 + (upperWick / body > 2 ? 20 : 10) + (volMult > 1.2 ? 15 : 0);
     return { type: SignalType.SHOOTING_STAR, stochRsi, score: finalScore };
   }

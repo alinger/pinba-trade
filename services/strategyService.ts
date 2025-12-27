@@ -45,7 +45,7 @@ export const calculateStochRSI = (candles: Candle[], index: number): number => {
   if (maxRsi === minRsi) return 0;
   return ((currentRsi - minRsi) / (maxRsi - minRsi)) * 100;
 };
-
+//布林带
 const calculateBollingerBands = (candles: Candle[], index: number) => {
   if (index < BB_PERIOD) return null;
   const slice = candles.slice(index - BB_PERIOD + 1, index + 1);
@@ -160,7 +160,7 @@ export const detectSignal = (candles: Candle[], index: number): { type: SignalTy
     return { type: SignalType.SHOOTING_STAR, stochRsi, score: finalScore };
   }
 
-  // 6. DOJI DETECTION
+  // 6. DOJI DETECTION（十字星）
   if (body / range < DOJI_BODY_THRESHOLD && (curr.low <= recentLow || curr.high >= recentHigh)) {
     const isExtreme = stochRsi < 20 || stochRsi > 80;
     finalScore = 30 + (isExtreme ? 30 : 0) + (volMult > 1.5 ? 15 : 0);

@@ -1,0 +1,5 @@
+{
+  "name": "BTC Pin Bar Pro Strategy",
+  "description": "A sophisticated trading strategy dashboard that identifies Pin Bar reversal signals on the BTC/USDT 5-minute chart, enhanced with Gemini AI for signal confirmation and market context analysis.",
+  "requestFramePermissions": []
+}

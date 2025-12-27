@@ -1,0 +1,43 @@
+name: Deploy React App to GitHub Pages
+
+on:
+  push:
+    branches: [ main ] # 当向 main 分支推送代码时触发
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 步骤1：获取项目源码
+      - name: Checkout code
+        uses: actions/checkout@v3[1,2,6](@ref)
+
+      # 步骤2：设置 Node.js 环境
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # 建议与你的开发环境版本一致[2](@ref)
+
+      # 步骤3：缓存依赖以加速后续构建
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-[2](@ref)
+
+      # 步骤4：安装依赖
+      - name: Install Dependencies
+        run: npm install[2,6](@ref)
+
+      # 步骤5：构建项目（生成静态文件）
+      - name: Build
+        run: npm run build[2,6](@ref)
+
+      # 步骤6：部署到 GitHub Pages
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # 使用内置的令牌，无需手动配置[2](@ref)
+          publish_dir: ./build # 指向构建产物的目录[2,6](@ref)
